@@ -41,6 +41,11 @@ services:
       - ./flask-api:/app
     networks:
       - monitoring
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1024M
 
   gin-app:
     build:
@@ -52,6 +57,11 @@ services:
     #   - ./gin-api:/app
     networks:
       - monitoring
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1024M
 
   prometheus:
     image: prom/prometheus
