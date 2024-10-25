@@ -6,6 +6,7 @@ from locust.env import Environment
 from locust.stats import stats_printer, stats_history
 from locust.log import setup_logging
 import logging
+from locust.exception import RescheduleTask
 
 class LoadTestUser(HttpUser):
     abstract = True
@@ -14,44 +15,57 @@ class LoadTestUser(HttpUser):
         super().__init__(*args, **kwargs)
         self.start_time = time.time()
         self.initial_wait = 1.0
+        self.max_rps = 400  # Maximum requests per second per user
     
     def wait_time(self):
         # Calculate minutes elapsed since start
         minutes_elapsed = (time.time() - self.start_time) / 60
         
-        # Calculate the new wait time with 50% reduction each minute
-        # Minimum wait time of 0.01 seconds to prevent overwhelming the system
-        new_wait = max(self.initial_wait / math.pow(2, minutes_elapsed), 0.01)
+        # Calculate the new wait time with a gentler increase (using 1.5 instead of 2)
+        # Set a minimum wait time based on max_rps
+        target_wait = self.initial_wait / math.pow(2, minutes_elapsed)
+        min_wait = 1.0 / self.max_rps
+        new_wait = max(target_wait, min_wait)
         
-        # Log current rate every 30 seconds
-        if int(time.time()) % 30 == 0:
+        # Log current rate every 15 seconds
+        if int(time.time()) % 15 == 0:
             current_rate = 1/new_wait if new_wait > 0 else "∞"
             print(f"\nCurrent target rate per user: {current_rate:.2f} requests/second")
             
         return new_wait
 
-# Separate the services into different user classes with fixed ratios
 class FlaskUser(LoadTestUser):
     host = "http://localhost:5500"
-    weight = 1  # Equal weight with GinUser
+    weight = 1
     
     @task(1)
     def ping_flask(self):
-        with self.client.get("/ping", name="Flask Ping", catch_response=True) as response:
-            if response.status_code != 200:
-                response.failure(f"Flask ping failed with status code: {response.status_code}")
+        try:
+            with self.client.get("/ping", name="Flask Ping", catch_response=True) as response:
+                if response.status_code != 200:
+                    response.failure(f"Flask ping failed with status code: {response.status_code}")
+                elif response.elapsed.total_seconds() > 1:  # If response takes more than 1 second
+                    response.failure(f"Flask ping too slow: {response.elapsed.total_seconds()}s")
+        except Exception as e:
+            print(f"Flask request failed: {str(e)}")
+            raise RescheduleTask()
 
 class GinUser(LoadTestUser):
     host = "http://localhost:8090"
-    weight = 1  # Equal weight with FlaskUser
+    weight = 1
     
     @task(1)
     def ping_gin(self):
-        with self.client.get("/ping", name="Gin Ping", catch_response=True) as response:
-            if response.status_code != 200:
-                response.failure(f"Gin ping failed with status code: {response.status_code}")
+        try:
+            with self.client.get("/ping", name="Gin Ping", catch_response=True) as response:
+                if response.status_code != 200:
+                    response.failure(f"Gin ping failed with status code: {response.status_code}")
+                elif response.elapsed.total_seconds() > 1:  # If response takes more than 1 second
+                    response.failure(f"Gin ping too slow: {response.elapsed.total_seconds()}s")
+        except Exception as e:
+            print(f"Gin request failed: {str(e)}")
+            raise RescheduleTask()
 
-# Custom event handlers
 @events.test_start.add_listener
 def on_test_start(environment, **kwargs):
     print(f"Load test starting at {time.strftime('%Y-%m-%d %H:%M:%S')}")
@@ -69,7 +83,7 @@ def on_quitting(environment, **kwargs):
 if __name__ == "__main__":
     setup_logging("INFO", None)
     
-    # Create a test environment with both user types
+    # Create a test environment
     env = Environment(user_classes=[FlaskUser, GinUser])
     
     # Start the test
@@ -81,15 +95,13 @@ if __name__ == "__main__":
     # Start a greenlet that saves current stats to history
     gevent.spawn(stats_history, env.runner)
     
-    # Start with 20 users (10 for each service) with spawn rate of 2 per second
-    env.runner.start(20, spawn_rate=2)
+    # Start with fewer users but maintain the ratio
+    env.runner.start(10, spawn_rate=1)
     
     try:
-        # Run indefinitely until interrupted
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
         print("\nStopping load test...")
     finally:
-        # Stop the runner
         env.runner.quit()
