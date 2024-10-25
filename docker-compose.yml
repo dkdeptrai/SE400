@@ -33,12 +33,12 @@ services:
 
   flask-app:
     build:
-      context: ./flask-api
+      context: ./flask-app
       dockerfile: Dockerfile
     ports:
       - 5500:5500
     volumes:
-      - ./flask-api:/app
+      - ./flask-app:/app
     networks:
       - monitoring
     deploy:
@@ -49,7 +49,7 @@ services:
 
   gin-app:
     build:
-      context: ./gin-api
+      context: ./gin-app
       dockerfile: Dockerfile
     ports:
       - 8090:8090
