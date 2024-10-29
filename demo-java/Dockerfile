@@ -21,7 +21,7 @@ WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 
 # Expose port của ứng dụng (thường là 8080)
-EXPOSE 8080
+EXPOSE 8091
 
 # Lệnh để khởi chạy ứng dụng
 ENTRYPOINT ["java", "-jar", "app.jar"]
