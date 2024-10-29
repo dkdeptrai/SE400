@@ -1,0 +1,5 @@
+server:
+  address: ":8080"
+
+database:
+  dsn: "host=localhost user=seminar password=seminar dbname=seminar port=15432 sslmode=disable"
