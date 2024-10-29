@@ -78,6 +78,21 @@ services:
         limits:
           cpus: "1"
           memory: 1024M
+  demo-java:
+    build:
+      context: ./demo-java
+      dockerfile: Dockerfile
+    ports:
+      - 8091:8091
+    # volumes:
+    #   - ./gin-api:/app
+    networks:
+      - monitoring
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1024M
 
   prometheus:
     image: prom/prometheus
