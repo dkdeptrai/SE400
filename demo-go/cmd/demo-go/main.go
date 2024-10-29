@@ -1,6 +1,9 @@
 package main
 
 import (
+	"demo-go/api/handlers"
+	"demo-go/internal/config"
+	"demo-go/internal/database"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -67,29 +70,43 @@ func recordSystemMetrics() {
 }
 
 func main() {
-	// Register Prometheus metrics
+    // Load configuration
+    cfg := config.LoadConfig()
+
+    // Initialize database
+    db := database.InitDB(cfg.Database.DSN)
+
+    // Register Prometheus metrics
 	prometheus.MustRegister(pingRequests, cpuUsage, ramUsage, ramUsagePercentage, requestLatency)
 
-	// Run system metrics recording in a goroutine
+	// Start recording system metrics in a separate goroutine
 	go recordSystemMetrics()
 
-	r := gin.Default()
+    // Set up the Gin router
+    r := gin.Default()
 
-	r.GET("/ping", func(c *gin.Context) {
-		// Measure request latency
+    // Middleware to measure request latency
+	r.Use(func(c *gin.Context) {
 		start := time.Now()
-		defer func() {
-			duration := time.Since(start).Seconds()
-			requestLatency.WithLabelValues("/ping").Observe(duration)
-		}()
+		c.Next()
+		duration := time.Since(start).Seconds()
+		requestLatency.WithLabelValues(c.FullPath()).Observe(duration)
+	})
 
+    // Custom ping endpoint to demonstrate metrics tracking
+	r.GET("/ping", func(c *gin.Context) {
 		pingRequests.WithLabelValues("200").Inc()
 		c.JSON(200, gin.H{
 			"message": "pong",
 		})
 	})
 
+    // Register routes
+    handlers.RegisterRoutes(r, db)
+
+	// Prometheus metrics endpoint
 	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
-	r.Run(":8090")
+    // Start the server
+    r.Run(cfg.Server.Address)
 }
