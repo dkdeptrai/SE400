@@ -19,5 +19,5 @@ scrape_configs:
 
   - job_name: "gin-app"
     static_configs:
-      - targets: ["gin-app:8090"]
+      - targets: ["demo-go:8090"]
     metrics_path: "/metrics"
