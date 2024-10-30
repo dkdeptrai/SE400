@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: seminar.demo
+  jackson:
+    time-zone: UTC
+  datasource:
+    url: jdbc:postgresql://localhost:15432/${POSTGRES_DB:seminar_java}
+    username: ${POSTGRES_USER:seminar}
+    password: ${POSTGRES_PASSWORD:seminar}
+  jpa:
+    hibernate:
+      ddl-auto: update
+server:
+  port: 8091
