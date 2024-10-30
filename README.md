@@ -10,10 +10,13 @@ A monitoring setup with Prometheus and Grafana for Flask and Gin applications.
 
 - Flask API (port 5500)
 - Gin API (port 8090)
+- Java API (port 8091)
 - Prometheus (port 9090)
 - Grafana (port 3000)
 - Node Exporter (port 9100)
 - cAdvisor (port 8080)
+- postgresql for go (port 15432)
+- postgresql for java (port 25432)
 
 ## Setup
 
