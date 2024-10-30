@@ -30,21 +30,41 @@ services:
       - 8080:8080
     networks:
       - monitoring
-  postgres:
-    container_name: seminar_demo_pg_container
+
+  # PostgreSQL instance for the Go app
+  postgres_go:
+    container_name: seminar_demo_pg_container_go
     image: postgres
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      POSTGRES_USER: go_user
+      POSTGRES_PASSWORD: go_password
+      POSTGRES_DB: go_database
       PG_DATA: /data/postgres
     volumes:
-      - gogo_postgres:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_go:/var/lib/postgresql/data
+      - ./init_go.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "15432:5432"
     networks:
-      - gogo_postgres
+      - monitoring
+    restart: unless-stopped
+
+  # PostgreSQL instance for the Java app
+  postgres_java:
+    container_name: seminar_demo_pg_container_java
+    image: postgres
+    environment:
+      POSTGRES_USER: java_user
+      POSTGRES_PASSWORD: java_password
+      POSTGRES_DB: java_database
+      PG_DATA: /data/postgres
+    volumes:
+      - postgres_java:/var/lib/postgresql/data
+      - ./init_java.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "25432:5432"
+    networks:
+      - monitoring
     restart: unless-stopped
 
   flask-app:
@@ -78,14 +98,14 @@ services:
         limits:
           cpus: "1"
           memory: 1024M
+    depends_on:
+      - postgres_go
   demo-java:
     build:
       context: ./demo-java
       dockerfile: Dockerfile
     ports:
       - 8091:8091
-    # volumes:
-    #   - ./gin-api:/app
     networks:
       - monitoring
     deploy:
@@ -93,6 +113,8 @@ services:
         limits:
           cpus: "1"
           memory: 1024M
+    depends_on:
+      - postgres_java
 
   prometheus:
     image: prom/prometheus
@@ -123,11 +145,11 @@ services:
 networks:
   monitoring:
     driver: bridge
-  gogo_postgres:
-    driver: bridge
 
 volumes:
   prometheus-data:
   grafana_data:
-  gogo_postgres:
+  postgres_go:
+    driver: local
+  postgres_java:
     driver: local

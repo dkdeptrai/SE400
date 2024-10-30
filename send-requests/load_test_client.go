@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	maxRequestsPerSecond = 500 // Maximum number of requests per second
+	maxRequestsPerSecond = 2000 // Maximum number of requests per second
 	server1              = "http://localhost:5500"
 	server2              = "http://localhost:8090"
 )
@@ -43,11 +43,11 @@ func main() {
 					log.Printf("Response from %s: %s", url, resp.Status)
 				}(i)
 			}
-			wg.Wait() // Wait for all requests to finish
+			// wg.Wait() // Wait for all requests to finish
 
 			// Increase requests per second, but cap at maxRequestsPerSecond
 			if requestsPerSecond < maxRequestsPerSecond {
-				requestsPerSecond++
+				requestsPerSecond += 100
 			}
 		}
 	}

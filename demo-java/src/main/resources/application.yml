@@ -4,9 +4,9 @@ spring:
   jackson:
     time-zone: UTC
   datasource:
-    url: jdbc:postgresql://localhost:15432/${POSTGRES_DB:seminar_java}
-    username: ${POSTGRES_USER:seminar}
-    password: ${POSTGRES_PASSWORD:seminar}
+    url: jdbc:postgresql://postgres_java:5432/java_database
+    username: java_user
+    password: java_password
   jpa:
     hibernate:
       ddl-auto: update
