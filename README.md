@@ -23,3 +23,26 @@ A monitoring setup with Prometheus and Grafana for Flask and Gin applications.
 1. Make sure Docker and Docker Compose are installed
 2. Run `docker-compose up -d`
 3. Access Grafana at http://localhost:3000 (admin/admin)
+
+## API
+
+1. Get order by id
+
+```
+curl --location 'localhost:8091/orders/1'
+```
+
+2. Place order
+
+```
+curl --location 'localhost:8091/orders' \
+--header 'Content-Type: application/json' \
+--data '{
+    "productId": 1,
+    "product": {
+        "id": 1
+    },
+    "quantity": 3,
+    "customer_id": 123
+}'
+```
