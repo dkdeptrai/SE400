@@ -31,7 +31,6 @@ services:
     networks:
       - monitoring
 
-  # PostgreSQL instance for the Go app
   postgres_go:
     container_name: seminar_demo_pg_container_go
     image: postgres
@@ -49,7 +48,6 @@ services:
       - monitoring
     restart: unless-stopped
 
-  # PostgreSQL instance for the Java app
   postgres_java:
     container_name: seminar_demo_pg_container_java
     image: postgres
@@ -67,21 +65,21 @@ services:
       - monitoring
     restart: unless-stopped
 
-  flask-app:
-    build:
-      context: ./flask-app
-      dockerfile: Dockerfile
-    ports:
-      - 5500:5500
-    volumes:
-      - ./flask-app:/app
-    networks:
-      - monitoring
-    deploy:
-      resources:
-        limits:
-          cpus: "1"
-          memory: 1024M
+  # flask-app:
+  #   build:
+  #     context: ./flask-app
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - 5500:5500
+  #   volumes:
+  #     - ./flask-app:/app
+  #   networks:
+  #     - monitoring
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: "1"
+  #         memory: 1024M
 
   demo-go:
     build:
@@ -96,10 +94,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "1"
-          memory: 1024M
+          cpus: "2"
+          memory: 2048M
     depends_on:
       - postgres_go
+
   demo-java:
     build:
       context: ./demo-java
@@ -111,8 +110,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "1"
-          memory: 1024M
+          cpus: "2"
+          memory: 2048M
     depends_on:
       - postgres_java
 
