@@ -3,3 +3,4 @@ server:
 
 database:
   dsn: "host=postgres_go user=go_user password=go_password dbname=go_database port=5432 sslmode=disable"
+  # dsn: "host=localhost user=go_user password=go_password dbname=go_database port=15432 sslmode=disable"

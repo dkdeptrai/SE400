@@ -21,7 +21,7 @@ type DatabaseConfig struct {
 }
 
 func LoadConfig() *Config {
-    // file, err := os.Open("../../configs/development.yaml")
+    // file, err := os.Open("configs/development.yaml")
     file, err := os.Open("/app/configs/development.yaml")
 
     if err != nil {

@@ -21,3 +21,8 @@ scrape_configs:
     static_configs:
       - targets: ["demo-go:8090"]
     metrics_path: "/metrics"
+
+  - job_name: "java-app"
+    static_configs:
+      - targets: ["demo-java:8091"]
+    metrics_path: "/actuator/prometheus"
