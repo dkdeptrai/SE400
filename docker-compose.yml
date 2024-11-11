@@ -26,6 +26,7 @@ services:
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
       - 8080:8080
     networks:
@@ -65,21 +66,21 @@ services:
       - monitoring
     restart: unless-stopped
 
-  # flask-app:
-  #   build:
-  #     context: ./flask-app
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - 5500:5500
-  #   volumes:
-  #     - ./flask-app:/app
-  #   networks:
-  #     - monitoring
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: "1"
-  #         memory: 1024M
+  flask-app:
+    build:
+      context: ./flask-app
+      dockerfile: Dockerfile
+    ports:
+      - 5500:5500
+    volumes:
+      - ./flask-app:/app
+    networks:
+      - monitoring
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 2048M
 
   demo-go:
     build:

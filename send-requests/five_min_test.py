@@ -2,60 +2,57 @@ from locust import HttpUser, task, constant_throughput, events
 from locust.env import Environment
 import time
 import logging
-from locust.runners import Runner
+from locust.runners import Runner, LocalRunner
 from locust.stats import stats_printer, stats_history
 import gevent
 
 logging.basicConfig(level=logging.INFO)
 class IncreasingRateUser(HttpUser):
+    abstract = True
+    # host = "http://localhost"
+    increase_interval = 1
+
     def __init__(self, environment):
         super().__init__(environment)
         self.current_wait_time = 1  # Initial wait time
+        self.last_increase = 0
 
     def wait_time(self):
         current_time = time.time()
         elapsed_since_last_increase = current_time - self.last_increase
 
         if elapsed_since_last_increase >= self.increase_interval:
-            self.current_wait_time = self.current_wait_time * 0.5
+            self.current_wait_time = self.current_wait_time * 0.1
             self.last_increase = current_time
         return self.current_wait_time
 
-    last_increase = 0
-    increase_interval = 1  # Increase rate every second
-
-# class FlaskUser(IncreasingRateUser):
-#     host = "http://localhost:8090"
-
-#     @task(1)
-#     def ping_flask(self):
-#         try:
-#             with self.client.get("/ping", name="Flask Ping", catch_response=True) as response:
-#                 if response.status_code != 200:
-#                     response.failure(f"Flask ping failed with status code: {response.status_code}")
-#                 elif response.elapsed.total_seconds() > 1:  # If response takes more than 1 second
-#                     response.failure(f"Flask ping too slow: {response.elapsed.total_seconds()}s")
-#         except Exception as e:
-#             print(f"Flask request failed: {str(e)}")
-
-class JavaUser(IncreasingRateUser):
-    host = "http://localhost:8091"
-
-    @task(1)
-    def ping_java(self):
-        try:
-            with self.client.get("/ping", name="Java Ping", catch_response=True) as response:
-                if response.status_code != 200:
-                    response.failure(f"Java ping failed with status code: {response.status_code}")
-                elif response.elapsed.total_seconds() > 1:  # If response takes more than 1 second
-                    response.failure(f"Java ping too slow: {response.elapsed.total_seconds()}s")
-        except Exception as e:
-            print(f"Java request failed: {str(e)}")
+    # @task(1)
+    # def ping_gin(self):
+    #     try:
+    #         with self.client.get(":8080/ping", name="Gin Ping", catch_response=True) as response:
+    #             if response.status_code != 200:
+    #                 response.failure(f"Gin ping failed with status code: {response.status_code}")
+    #             elif response.elapsed.total_seconds() > 1:  # If response takes more than 1 second
+    #                 response.failure(f"Gin ping too slow: {response.elapsed.total_seconds()}s")
+    #     except Exception as e:
+    #         print(f"Gin request failed: {str(e)}")
+    
+    # @task(0)
+    # def ping_flask(self):
+    #     try:
+    #         with self.client.get(":5500/ping", name="Flask Ping", catch_response=True) as response:
+    #             if response.status_code != 200:
+    #                 response.failure(f"Flask ping failed with status code: {response.status_code}")
+    #             elif response.elapsed.total_seconds() > 1:
+    #                 response.failure(f"Flask ping too slow: {response.elapsed.total_seconds()}s")
+    #     except Exception as e:
+    #         print(f"Flask request failed: {str(e)}")
+    
 
 class GinUser(IncreasingRateUser):
     host = "http://localhost:8090"
 
-    @task(1)
+    @task
     def ping_gin(self):
         try:
             with self.client.get("/ping", name="Gin Ping", catch_response=True) as response:
@@ -65,6 +62,33 @@ class GinUser(IncreasingRateUser):
                     response.failure(f"Gin ping too slow: {response.elapsed.total_seconds()}s")
         except Exception as e:
             print(f"Gin request failed: {str(e)}")
+
+class FlaskUser(IncreasingRateUser):
+    host = "http://localhost:5500"
+
+    @task
+    def ping_flask(self):
+        try:
+            with self.client.get("/ping", name="Flask Ping", catch_response=True) as response:
+                if response.status_code != 200:
+                    response.failure(f"Flask ping failed with status code: {response.status_code}")
+                elif response.elapsed.total_seconds() > 1:  # If response takes more than 1 second
+                    response.failure(f"Flask ping too slow: {response.elapsed.total_seconds()}s")
+        except Exception as e:
+            print(f"Flask request failed: {str(e)}")
+class JavaUser(IncreasingRateUser):
+    host = "http://localhost:8091"
+    
+    @task
+    def ping_java(self):
+        try:
+            with self.client.get("/actuator/prometheus", name="Java Ping", catch_response=True) as response:
+                if response.status_code != 200:
+                    response.failure(f"Java ping failed with status code: {response.status_code}")
+                elif response.elapsed.total_seconds() > 1:  # If response takes more than 1 second
+                    response.failure(f"Java ping too slow: {response.elapsed.total_seconds()}s")
+        except Exception as e:
+            print(f"Java request failed: {str(e)}")
 
 
 @events.test_start.add_listener
@@ -83,22 +107,20 @@ def on_quitting(environment, **kwargs):
 
 if __name__ == "__main__":
     # Create an Environment instance
-    env = Environment(user_classes=[GinUser, JavaUser])
+    env = Environment(user_classes=[GinUser])
 
     # Create a LocalRunner instance
-    runner = env.create_local_runner()
+    runner = LocalRunner(env)
+    env.runner = runner
 
     # Start a greenlet that periodically outputs the current stats
     gevent.spawn(stats_printer(env.stats))
 
-    # Start a greenlet that saves current stats to history
-    gevent.spawn(stats_history, runner)
+    runner.start(10, 1)
 
-    # Start with fewer users but maintain the ratio
-    runner.start(10, spawn_rate=1)
-
+    # Allow test to run
     try:
-        while True:
+        while runner.state != "stopped":
             time.sleep(1)
     except KeyboardInterrupt:
         print("\nStopping load test...")
