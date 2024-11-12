@@ -2,6 +2,8 @@ package com.uit.se400.seminar.demo.controller;
 
 import com.uit.se400.seminar.demo.entity.Order;
 import com.uit.se400.seminar.demo.service.OrderService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/orders")
 public class OrderController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(OrderController.class);
 
     private final OrderService orderService;
 
@@ -34,6 +37,7 @@ public class OrderController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getOrder(@PathVariable Long id) {
+        LOGGER.info("Get order request, id: {}", id);
         try {
             Order order = orderService.getOrder(id);
             return ResponseEntity.ok(order);
