@@ -19,7 +19,7 @@ var (
 			Name: "go_ping_requests_total",
 			Help: "Total number of requests to the /ping endpoint",
 		},
-		[]string{"status"},
+		[]string{"code"},
 	)
 
 	cpuUsage = prometheus.NewGauge(
