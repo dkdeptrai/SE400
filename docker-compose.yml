@@ -66,21 +66,21 @@ services:
       - monitoring
     restart: unless-stopped
 
-  flask-app:
-    build:
-      context: ./flask-app
-      dockerfile: Dockerfile
-    ports:
-      - 5500:5500
-    volumes:
-      - ./flask-app:/app
-    networks:
-      - monitoring
-    deploy:
-      resources:
-        limits:
-          cpus: "2"
-          memory: 2048M
+  # flask-app:
+  #   build:
+  #     context: ./flask-app
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - 5500:5500
+  #   volumes:
+  #     - ./flask-app:/app
+  #   networks:
+  #     - monitoring
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: "2"
+  #         memory: 2048M
 
   demo-go:
     build:
@@ -122,7 +122,8 @@ services:
     restart: unless-stopped
     volumes:
       - ./prometheus:/etc/prometheus
-      - prometheus-data:/prometheus
+      # - prometheus-data:/prometheus
+      - /tmp/prometheus-data
     ports:
       - 9090:9090
     command:

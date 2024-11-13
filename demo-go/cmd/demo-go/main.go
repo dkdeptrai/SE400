@@ -94,12 +94,31 @@ func main() {
 	})
 
     // Custom ping endpoint to demonstrate metrics tracking
-	r.GET("/ping", func(c *gin.Context) {
-		pingRequests.WithLabelValues("200").Inc()
-		c.JSON(200, gin.H{
-			"message": "pong",
+		r.GET("/ping", func(c *gin.Context) {
+			pingRequests.WithLabelValues("200").Inc()
+		
+			response := gin.H{
+				"message": "Application Status",
+				"data": gin.H{
+					"applicationName": "MyAwesomeApp",
+					"version":         "3.4.5",
+					"releaseDate":     "2023-06-01",
+					"serverHostname":  "app-server-01.mycompany.com",
+					"serverLocation":  "New York, USA",
+					"serverUptime":    "14 days, 6 hours, 32 minutes",
+					"databaseStatus":  "connected",
+					"databaseVersion": "PostgreSQL 14.2",
+					"serviceHealth": gin.H{
+						"cpu_utilization":  "45%",
+						"memory_utilization": "72%",
+						"network_throughput": "350 Mbps",
+					},
+				},
+				"status": "healthy",
+			}
+		
+			c.JSON(200, response)
 		})
-	})
 
     // Register routes
     handlers.RegisterRoutes(r, db)
