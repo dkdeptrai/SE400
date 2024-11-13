@@ -27,7 +27,12 @@ scrape_configs:
       - targets: ["demo-java:8091"]
     metrics_path: "/actuator/prometheus"
 
-  - job_name: "client-service"
+  - job_name: "client-go"
     static_configs:
       - targets: ["host.docker.internal:8081"]
+    metrics_path: "/metrics"
+
+  - job_name: "client-java"
+    static_configs:
+      - targets: ["host.docker.internal:8082"]
     metrics_path: "/metrics"

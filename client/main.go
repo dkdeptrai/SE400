@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
@@ -17,6 +18,7 @@ var (
 	maxClients    = flag.Int("maxClients", 100, "Maximum number of virtual clients")
 	scaleInterval = flag.Int("scaleInterval", 1, "Scale interval in milliseconds")
 	randomSleep   = flag.Int("randomSleep", 1000, "Random sleep from 0 to target microseconds")
+	port          = flag.Int("port", 8081, "Port for Prometheus HTTP server metrics")
 	targets       multiString // Custom flag type to handle multiple targets
 )
 
@@ -54,7 +56,7 @@ func main() {
 	pMux.Handle("/metrics", promHandler)
 
 	go func() {
-		log.Fatal(http.ListenAndServe(":8081", pMux))
+		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *port), pMux))
 	}()
 
 	// Create transport and client to reuse connection pool
