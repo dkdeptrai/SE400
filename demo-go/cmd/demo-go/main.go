@@ -104,6 +104,7 @@ func main() {
     // Register routes
     handlers.RegisterRoutes(r, db)
     handlers.RegisterImageRoutes(r, db)
+    handlers.RegisterProductRoutes(r, db)
 
 	// Prometheus metrics endpoint
 	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
