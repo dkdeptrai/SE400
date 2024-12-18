@@ -1,22 +1,20 @@
 package com.uit.se400.seminar.demo.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 
 @Service
 public class ImageConvertService {
 
-    public static void main(String[] args) {
-        convertToMonochrome();
-    }
-    public static void convertToMonochrome() {
+    public static byte[] convertToMonochrome(MultipartFile file) {
         try {
             // Read image to buffer
-            BufferedImage image = ImageIO.read(new File("input.jpg"));
+            InputStream inputStream = new ByteArrayInputStream(file.getBytes());
+            BufferedImage image = ImageIO.read(inputStream);
             int width = image.getWidth();
             int height = image.getHeight();
 
@@ -44,6 +42,9 @@ public class ImageConvertService {
             // Write output image
             ImageIO.write(monochromeImage, "jpg", new File("output.jpg"));
             System.out.println("Conversion completed.");
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            ImageIO.write(monochromeImage, "jpg", byteArrayOutputStream);
+            return byteArrayOutputStream.toByteArray();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
