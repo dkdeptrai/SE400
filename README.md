@@ -25,6 +25,7 @@ A monitoring setup with Prometheus and Grafana for Spring Boot (Java) and Gin (G
 3. Access Grafana at http://localhost:3000 (admin/admin)
 4. Create new Dashboard and query metrics to your needs
 5. To run the request client, navigate to `client` and run `go build -o client main.go metrics.go requests.go` then run the binary using `./client -target="http://localhost:8090/orders/1" -target="http://localhost:8091/orders/1" -maxClients=200 -scaleInterval=500`. Replace the -target flags with URL to your needs.
+
 ## API
 
 1. Get order by id
