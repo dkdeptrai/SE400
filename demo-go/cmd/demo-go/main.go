@@ -93,18 +93,17 @@ func main() {
 		requestLatency.WithLabelValues(c.FullPath()).Observe(duration)
 	})
 
-	handlers.ConvertToMonochrome()
-
     // Custom ping endpoint to demonstrate metrics tracking
-	// r.GET("/ping", func(c *gin.Context) {
-	// 	pingRequests.WithLabelValues("200").Inc()
-	// 	c.JSON(200, gin.H{
-	// 		"message": "pong",
-	// 	})
-	// })
+	r.GET("/ping", func(c *gin.Context) {
+		pingRequests.WithLabelValues("200").Inc()
+		c.JSON(200, gin.H{
+			"message": "pong",
+		})
+	})
 
     // Register routes
     handlers.RegisterRoutes(r, db)
+    handlers.RegisterImageRoutes(r, db)
 
 	// Prometheus metrics endpoint
 	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
