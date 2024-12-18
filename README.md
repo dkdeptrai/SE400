@@ -4,7 +4,7 @@ Learning Repository for Benchmarking and comparison between different API Framew
 
 # Monitoring Stack
 
-A monitoring setup with Prometheus and Grafana for Flask and Gin applications.
+A monitoring setup with Prometheus and Grafana for Spring Boot (Java) and Gin (Go) applications.
 
 ## Services
 
