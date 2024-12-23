@@ -8,7 +8,6 @@ A monitoring setup with Prometheus and Grafana for Spring Boot (Java) and Gin (G
 
 ## Services
 
-- Flask API (port 5500)
 - Gin API (port 8090)
 - Java API (port 8091)
 - Prometheus (port 9090)
