@@ -124,6 +124,7 @@ func main() {
     handlers.RegisterRoutes(r, db)
     handlers.RegisterImageRoutes(r, db)
     handlers.RegisterProductRoutes(r, db)
+    handlers.RegisterStaticJsonRoutes(r)
 
 	// Prometheus metrics endpoint
 	r.GET("/metrics", gin.WrapH(promhttp.Handler()))

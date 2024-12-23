@@ -47,3 +47,22 @@ curl --location 'localhost:8091/orders' \
     "customer_id": 123
 }'
 ```
+
+3. Get all products
+
+```
+curl --location 'localhost:8091/api/products'
+```
+
+4. Convert image to monochrome
+
+```
+curl --location 'localhost:8091/api/images/upload' \
+--form 'file=@"your-file"'
+```
+
+5. Get static json
+
+```
+curl --location 'localhost:8091/api/static-json'
+```
