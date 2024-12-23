@@ -7,7 +7,19 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus"
 	"gorm.io/gorm"
+)
+
+var (
+    // Counter for get static json request
+    convertImageCounter = prometheus.NewCounterVec(
+        prometheus.CounterOpts{
+            Name: "convert_image_requests_total",
+            Help: "Total number of convert image requests",
+        },
+        []string{"status"}, 
+    )
 )
 
 func RegisterImageRoutes(r *gin.Engine, db *gorm.DB) {
@@ -20,6 +32,9 @@ func ConvertToMonochromeHandler(c *gin.Context) {
 	// Get file from request
 	file, _, err := c.Request.FormFile("file")
 	if err != nil {
+        // Increment failure count for converting image
+        convertImageCounter.WithLabelValues("failure").Inc()
+		
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to read file from request: " + err.Error()})
 		return
 	}
@@ -28,6 +43,9 @@ func ConvertToMonochromeHandler(c *gin.Context) {
 	// Decode input image
 	img, _, err := image.Decode(file)
 	if err != nil {
+        // Increment failure count for converting image
+        convertImageCounter.WithLabelValues("failure").Inc()
+
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to decode image: " + err.Error()})
 		return
 	}
@@ -42,9 +60,15 @@ func ConvertToMonochromeHandler(c *gin.Context) {
 	// Encode result image and return to response
 	err = jpeg.Encode(c.Writer, monochromeImg, nil)
 	if err != nil {
+        // Increment failure count for converting image
+        convertImageCounter.WithLabelValues("failure").Inc()
+
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to encode image: " + err.Error()})
 		return
 	}
+
+    // Increment success count for converting image
+    convertImageCounter.WithLabelValues("success").Inc()
 }
 
 func convertToMonochrome(img image.Image) *image.Gray {
