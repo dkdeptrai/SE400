@@ -42,7 +42,7 @@ func GetAllProducts(c *gin.Context, db *gorm.DB) {
     }
 
     // Increment success count for get all products
-    orderRetrievalCounter.WithLabelValues("success").Inc()
+    getAllProductsCounter.WithLabelValues("success").Inc()
 
     c.JSON(http.StatusOK, products)
 }
