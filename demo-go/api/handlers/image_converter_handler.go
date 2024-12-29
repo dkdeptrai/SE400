@@ -12,7 +12,6 @@ import (
 )
 
 var (
-    // Counter for get static json request
     convertImageCounter = prometheus.NewCounterVec(
         prometheus.CounterOpts{
             Name: "convert_image_requests_total",
@@ -21,6 +20,10 @@ var (
         []string{"status"}, 
     )
 )
+
+func init() {
+		prometheus.MustRegister(convertImageCounter)
+}
 
 func RegisterImageRoutes(r *gin.Engine, db *gorm.DB) {
     r.POST("/api/images/upload", func(c *gin.Context) {
