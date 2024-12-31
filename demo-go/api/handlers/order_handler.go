@@ -3,6 +3,7 @@ package handlers
 import (
 	"demo-go/internal/models"
 	"demo-go/internal/services"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -56,6 +57,7 @@ func CreateOrder(c *gin.Context, db *gorm.DB) {
     }
 
     // Check stock
+    fmt.Println("product_id:", order.ProductID, ", quantity: ", order.Quantity)
     hasStock, err := services.CheckStock(db, order.ProductID, order.Quantity)
     if err != nil {
         // Increment failure count for order creation
@@ -80,6 +82,7 @@ func CreateOrder(c *gin.Context, db *gorm.DB) {
     }
 
     order.TotalPrice = product.Price * float64(order.Quantity)
+    fmt.Println("TotalPrice: ", order.TotalPrice, "Price: ", product.Price, "Quantity: ", float64(order.Quantity))
     order.Status = "Pending"
 
     result := db.Create(&order)
