@@ -19,6 +19,8 @@ var (
 	scaleInterval = flag.Int("scaleInterval", 1, "Scale interval in milliseconds")
 	randomSleep   = flag.Int("randomSleep", 1000, "Random sleep from 0 to target microseconds")
 	port          = flag.Int("port", 8081, "Port for Prometheus HTTP server metrics")
+	httpMethod    = flag.String("httpMethod", "GET", "HTTP method to use (GET or POST)")
+	jsonBody      = flag.String("jsonBody", "", "JSON body to include in POST requests")
 	targets       multiString // Custom flag type to handle multiple targets
 )
 
